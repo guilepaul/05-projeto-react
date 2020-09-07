@@ -1,64 +1,61 @@
-import React from "react";
+import React, { useState, FormEvent } from "react";
 
 import logoImg from "../../assets/logo.svg";
 import { FiChevronRight } from "react-icons/fi";
+import api from "../../services/api";
 
 import { Title, Form, Repositories } from "./styles";
 
+interface Repository {
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
 const Dashboard: React.FC = () => {
+  const [newRepo, setNewRepo] = useState("");
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  async function handleAddRepository(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    event.preventDefault();
+
+    const response = await api.get<Repository>(`repos/${newRepo}`);
+
+    const repository = response.data;
+
+    setRepositories([...repositories, repository]);
+  }
   return (
     <>
       <img src={logoImg} alt="Github Exporer" />
       <Title>Explore repositórios no Github</Title>
-      <Form>
-        <input placeholder="Digite aqui o nome do repositório" />
+      <Form onSubmit={handleAddRepository}>
+        <input
+          value={newRepo}
+          onChange={(e) => setNewRepo(e.target.value)}
+          placeholder="Digite aqui o nome do repositório"
+        />
         <button type="submit">Pesquisar</button>
       </Form>
       <Repositories>
-        <a href="teste">
-          <img
-            src="https://avatars2.githubusercontent.com/u/44080230?s=460&u=e66e4a0450c2faee5783942339b88343a2a6d8a4&v=4"
-            alt="Guilherme Di Paula"
-          />
-          <div>
-            <strong>guilepaul/gobarber</strong>
-            <p>Sistema para agendamento de serviços de barbearia.</p>
-          </div>
-          <FiChevronRight size={20} />
-        </a>
-        <a href="teste">
-          <img
-            src="https://avatars2.githubusercontent.com/u/44080230?s=460&u=e66e4a0450c2faee5783942339b88343a2a6d8a4&v=4"
-            alt="Guilherme Di Paula"
-          />
-          <div>
-            <strong>guilepaul/gobarber</strong>
-            <p>Sistema para agendamento de serviços de barbearia.</p>
-          </div>
-          <FiChevronRight size={20} />
-        </a>
-        <a href="teste">
-          <img
-            src="https://avatars2.githubusercontent.com/u/44080230?s=460&u=e66e4a0450c2faee5783942339b88343a2a6d8a4&v=4"
-            alt="Guilherme Di Paula"
-          />
-          <div>
-            <strong>guilepaul/gobarber</strong>
-            <p>Sistema para agendamento de serviços de barbearia.</p>
-          </div>
-          <FiChevronRight size={20} />
-        </a>
-        <a href="teste">
-          <img
-            src="https://avatars2.githubusercontent.com/u/44080230?s=460&u=e66e4a0450c2faee5783942339b88343a2a6d8a4&v=4"
-            alt="Guilherme Di Paula"
-          />
-          <div>
-            <strong>guilepaul/gobarber</strong>
-            <p>Sistema para agendamento de serviços de barbearia.</p>
-          </div>
-          <FiChevronRight size={20} />
-        </a>
+        {repositories.map((repository) => (
+          <a href="teste" key={repository.full_name}>
+            <img
+              src={repository.owner.avatar_url}
+              alt={repository.owner.login}
+            />
+            <div>
+              <strong>{repository.full_name}</strong>
+              <p>{repository.description}</p>
+            </div>
+            <FiChevronRight size={20} />
+          </a>
+        ))}
       </Repositories>
     </>
   );
